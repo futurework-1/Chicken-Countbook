@@ -16,13 +16,12 @@ struct LoadingScreen: View {
                     .scaledToFit()
                     .padding(.horizontal, 30)
             }
-            .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    withAnimation {
-                        isLoading = false
-                    }
+            .onReceive(NotificationCenter.default.publisher(for: .splashTransition)) { _ in
+                withAnimation {
+                    self.isLoading = false
                 }
             }
+
         } else if !hasSeenTutorial {
             OnboardingScreen()
         } else {

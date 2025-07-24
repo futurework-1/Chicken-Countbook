@@ -317,6 +317,21 @@ extension Date {
     }
 }
 
+struct AppConstants {
+    static let metricsBaseURL = "https://ckencount.com/app/metrics"
+    static let salt = "61M06DohLclYeAFtvLFObvgKViYH4pQg"
+    static let oneSignalAppID = "774bf801-cc39-4287-8033-caab71655bdd"
+    static let userDefaultsKey = "count"
+    static let remoteConfigStateKey = "countState"
+    static let remoteConfigKey = "chick"
+}
+
+struct MetricsResponse {
+    let isOrganic: Bool
+    let url: String
+    let parameters: [String: String]
+}
+
 #Preview {
     CareCalendar()
         .environmentObject(ReminderManager())

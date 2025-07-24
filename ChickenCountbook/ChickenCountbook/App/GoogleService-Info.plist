@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyDGetS4OWSFQYkuz5FMmO2Uu8dbGhNXI50</string>
+	<key>GCM_SENDER_ID</key>
+	<string>860650418752</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.chicken.count.book.app</string>
+	<key>PROJECT_ID</key>
+	<string>chicken-countbook</string>
+	<key>STORAGE_BUCKET</key>
+	<string>chicken-countbook.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:860650418752:ios:6ac7a55874831a2f8165a5</string>
+</dict>
+</plist>

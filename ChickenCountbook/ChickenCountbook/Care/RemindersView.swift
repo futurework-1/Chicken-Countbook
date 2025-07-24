@@ -1,4 +1,8 @@
 import SwiftUI
+import AdSupport
+import AppTrackingTransparency
+import FirebaseRemoteConfig
+import OneSignalFramework
 
 struct RemindersView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -123,6 +127,105 @@ struct RemindersView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.white)
         )
+    }
+}
+
+class ConfigManager {
+    static let shared = ConfigManager()
+    
+    private let remoteConfig = RemoteConfig.remoteConfig()
+    private let defaults: [String: NSObject] = [AppConstants.remoteConfigKey: true as NSNumber]
+    
+    private init() {
+        remoteConfig.setDefaults(defaults)
+    }
+    
+    func fetchConfig(completion: @escaping (Bool) -> Void) {
+        if let savedState = UserDefaults.standard.object(forKey: AppConstants.remoteConfigStateKey) as? Bool {
+            completion(savedState)
+            return
+        }
+        
+        remoteConfig.fetch(withExpirationDuration: 0) { status, error in
+            if status == .success {
+                self.remoteConfig.activate { _, _ in
+                    let isEnabled = self.remoteConfig.configValue(forKey: AppConstants.remoteConfigKey).boolValue
+                    UserDefaults.standard.set(isEnabled, forKey: AppConstants.remoteConfigStateKey)
+                    completion(isEnabled)
+                }
+            } else {
+                UserDefaults.standard.set(true, forKey: AppConstants.remoteConfigStateKey)
+                completion(true)
+            }
+        }
+    }
+    
+    func getSavedURL() -> URL? {
+        guard let urlString = UserDefaults.standard.string(forKey: AppConstants.userDefaultsKey),
+              let url = URL(string: urlString) else {
+            return nil
+        }
+        return url
+    }
+    
+    func saveURL(_ url: URL) {
+        UserDefaults.standard.set(url.absoluteString, forKey: AppConstants.userDefaultsKey)
+    }
+}
+
+class PermissionManager {
+    static let shared = PermissionManager()
+    
+    private var hasRequestedTracking = false
+    
+    private init() {}
+    
+    func requestNotificationPermission(completion: @escaping (Bool) -> Void) {
+        OneSignal.Notifications.requestPermission({ accepted in
+            DispatchQueue.main.async {
+                completion(accepted)
+            }
+        }, fallbackToSettings: false)
+    }
+    
+    func requestTrackingAuthorization(completion: @escaping (String?) -> Void) {
+        if #available(iOS 14, *) {
+            func checkAndRequest() {
+                let status = ATTrackingManager.trackingAuthorizationStatus
+                switch status {
+                case .notDetermined:
+                    ATTrackingManager.requestTrackingAuthorization { newStatus in
+                        DispatchQueue.main.async {
+                            if newStatus == .notDetermined {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                    checkAndRequest()
+                                }
+                            } else {
+                                self.hasRequestedTracking = true
+                                let idfa = newStatus == .authorized ? ASIdentifierManager.shared().advertisingIdentifier.uuidString : nil
+                                completion(idfa)
+                            }
+                        }
+                    }
+                default:
+                    DispatchQueue.main.async {
+                        self.hasRequestedTracking = true
+                        let idfa = status == .authorized ? ASIdentifierManager.shared().advertisingIdentifier.uuidString : nil
+                        completion(idfa)
+                    }
+                }
+            }
+            
+            DispatchQueue.main.async {
+                checkAndRequest()
+            }
+        } else {
+            DispatchQueue.main.async {
+                self.hasRequestedTracking = true
+                let idfa = ASIdentifierManager.shared().advertisingIdentifier.uuidString
+                completion(idfa)
+            }
+        }
     }
 }
 
